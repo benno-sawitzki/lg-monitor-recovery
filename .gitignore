@@ -1,0 +1,8 @@
+build/
+__pycache__/
+*.pyc
+.DS_Store
+recovery.lock
+wake-status.json
+wake-status.tmp
+*.log
