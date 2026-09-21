@@ -30,6 +30,7 @@ been isolated to monitor firmware, cable, or macOS display handling.
 - A ten-second display-awake hold so mouse movement is unnecessary.
 - Left-click or right-click the menu bar icon to open the same native menu,
   including Quit, Settings, automatic recovery, manual recovery, and logs.
+- Click the icon again to close the menu; native positioning keeps the icon visible.
 - Optional start at login.
 - Separate wake process that survives the recovery helper exiting.
 - Supports multiple external displays while watching the configured monitor by identity.
@@ -107,6 +108,9 @@ recovery is distinct from a successful system command or unit test.
 With version 1.4, the owner confirmed both LG screens showed a picture after
 manual recovery with two external monitors connected. Automatic recovery after
 a physical monitor power cycle with both connected still needs confirmation.
+
+With version 1.4.2, the owner confirmed the menu stays below the icon and closes
+when the icon is clicked again.
 
 See [LOCAL-SETUP.md](LOCAL-SETUP.md) for implementation timing, installation paths,
 validation history, and disable/remove instructions.

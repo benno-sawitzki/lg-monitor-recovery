@@ -6,6 +6,8 @@ static NSString * const JobLabel = @"local.lg-monitor-recovery";
 @interface AppDelegate : NSObject <NSApplicationDelegate, NSMenuDelegate>
 @property NSStatusItem *statusItem;
 @property NSMenu *menu;
+@property BOOL menuOpen;
+@property id menuClickMonitor;
 @property NSMenuItem *stateItem;
 @property NSMenuItem *lastItem;
 @property NSMenuItem *enabledItem;
@@ -64,6 +66,7 @@ static NSString * const JobLabel = @"local.lg-monitor-recovery";
     [self add:@"About LG Monitor Recovery" action:@selector(about:)];
     [self.menu addItem:[NSMenuItem separatorItem]];
     [self add:@"Quit LG Monitor Recovery" action:@selector(quit:)].keyEquivalent = @"q";
+    // Let the status item anchor its menu below the menu bar on every display.
     self.statusItem.menu = self.menu;
     [self startWorker];
     [self refresh];
@@ -159,7 +162,35 @@ static NSString * const JobLabel = @"local.lg-monitor-recovery";
 - (BOOL)applicationShouldHandleReopen:(NSApplication *)sender hasVisibleWindows:(BOOL)visible {
     (void)sender; (void)visible; [self showSettings:nil]; return YES;
 }
-- (void)menuWillOpen:(NSMenu *)menu { (void)menu; [self refresh]; }
+- (void)menuWillOpen:(NSMenu *)menu {
+    (void)menu;
+    self.menuOpen = YES;
+    [self refresh];
+    // Consume a second press on the icon before AppKit can reopen the menu.
+    // Listen on mouse-down, so releasing that same click cannot open it again.
+    __weak AppDelegate *weakSelf = self;
+    self.menuClickMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:
+        NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown handler:^NSEvent *(NSEvent *event) {
+        AppDelegate *delegate = weakSelf;
+        NSStatusBarButton *button = delegate.statusItem.button;
+        if (!delegate.menuOpen || !button.window) return event;
+        NSRect iconRect = [button.window convertRectToScreen:[button convertRect:button.bounds toView:nil]];
+        NSPoint point = event.window ? [event.window convertPointToScreen:event.locationInWindow] : NSEvent.mouseLocation;
+        if (NSPointInRect(point, iconRect)) {
+            [delegate.menu cancelTrackingWithoutAnimation];
+            return nil;
+        }
+        return event;
+    }];
+}
+- (void)menuDidClose:(NSMenu *)menu {
+    (void)menu;
+    self.menuOpen = NO;
+    if (self.menuClickMonitor) {
+        [NSEvent removeMonitor:self.menuClickMonitor];
+        self.menuClickMonitor = nil;
+    }
+}
 - (void)toggleRecovery:(id)sender {
     (void)sender;
     BOOL next = !self.enabled;
@@ -218,7 +249,7 @@ static NSString * const JobLabel = @"local.lg-monitor-recovery";
     (void)sender;
     NSAlert *alert = [NSAlert new];
     alert.messageText = @"LG Monitor Recovery";
-    alert.informativeText = @"Restores the video signal after your LG 27UD58-B is turned off and on.\n\nWhen the monitor starts responding again, the app briefly sleeps and wakes only the display output. Your Mac and apps keep running.\n\nAutomatic recovery supports multiple external displays. All screens briefly sleep and wake during recovery. Normal display sleep cancels pending recovery.\n\nVersion 1.4 • Built for this Mac and monitor.\nUses m1ddc (MIT license).";
+    alert.informativeText = @"Restores the video signal after your LG 27UD58-B is turned off and on.\n\nWhen the monitor starts responding again, the app briefly sleeps and wakes only the display output. Your Mac and apps keep running.\n\nAutomatic recovery supports multiple external displays. All screens briefly sleep and wake during recovery. Normal display sleep cancels pending recovery.\n\nVersion 1.4.2 • Built for this Mac and monitor.\nUses m1ddc (MIT license).";
     [alert addButtonWithTitle:@"OK"];
     [alert runModal];
 }

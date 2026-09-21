@@ -3,7 +3,7 @@
 Installed app: `/Applications/LG Monitor Recovery.app`.
 
 Left-click or right-click its monitor icon to open the same native menu,
-including Settings and Quit.
+including Settings and Quit. Click the icon again to close the menu.
 Settings lets you pause automatic recovery,
 turn login startup on/off, or recover the display manually. Opening the app from
 Applications also opens Settings. Closing Settings leaves the menu app running;
@@ -76,6 +76,9 @@ Version 1.4 passes all 15 regression tests. With two LG monitors connected, manu
 recovery completed, automatic monitoring resumed, and the user confirmed both
 screens showed a picture. Automatic recovery after a physical power cycle with
 both monitors connected still needs confirmation.
+
+Version 1.4.2 keeps the menu below the menu bar icon and closes it when the icon
+is clicked again. The owner confirmed both placement and dismissal work.
 
 ## Disable or remove
 
