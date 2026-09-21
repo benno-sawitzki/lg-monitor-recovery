@@ -18,24 +18,40 @@ READER = BASE / 'source/m1ddc'
 STOP = threading.Event()
 
 
+def target_available(state):
+    return (isinstance(state, dict) and state.get('online') is True
+            and state.get('asleep') is False
+            and type(state.get('external_count')) is int
+            and state['external_count'] >= 1)
+
+
+def topology(state):
+    return state.get('display_id'), state.get('external_count')
+
+
 class RecoveryGate:
     def __init__(self):
         self.bad = self.good = 0
         self.armed = False
         self.previous_time = None
+        self.previous_topology = None
 
     def reset(self):
         self.bad = self.good = 0
         self.armed = False
+        self.previous_topology = None
 
     def update(self, state, now):
         if self.previous_time is not None and (now - self.previous_time > 10 or now < self.previous_time):
             self.reset()
         self.previous_time = now
-        if (not state or state.get('online') is not True or state.get('asleep') is not False
-                or state.get('external_count') != 1):
+        if not target_available(state):
             self.reset()
             return False
+        current_topology = topology(state)
+        if self.previous_topology is not None and current_topology != self.previous_topology:
+            self.reset()
+        self.previous_topology = current_topology
         if state.get('power') not in (-1, 1, 2, 3, 4):
             self.reset()
             return False
@@ -102,7 +118,7 @@ def main():
             signal.signal(sig, lambda *_: STOP.set())
         if args.recover_once:
             check = probe()
-            if check and check.get('online') is True and check.get('asleep') is False and check.get('external_count') == 1:
+            if target_available(check):
                 recover()
             else:
                 logging.info('manual_recovery_skipped target_not_available_or_asleep')
@@ -121,8 +137,8 @@ def main():
             if gate.update(state, time.time()):
                 # Recheck after the trigger so a concurrent unplug or normal sleep cancels the reset.
                 check = probe()
-                if (check and check.get('online') is True and check.get('asleep') is False
-                        and check.get('power') == 1 and check.get('external_count') == 1):
+                if (target_available(check) and check.get('power') == 1
+                        and topology(check) == topology(state)):
                     logging.info('monitor_returned_after_control_outage')
                     recover()
                 else:

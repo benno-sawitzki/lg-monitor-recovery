@@ -24,8 +24,9 @@ It resets each detected cycle once, rather than
 imposing a cooldown that would skip a second intentional power cycle.
 
 It is restricted to monitor identity `7789:23305:YOUR_MONITOR_SERIAL`, ignores isolated read
-errors, cancels pending recovery on unplug or normal display sleep, and pauses
-when more than one external/virtual display is present. Between probes it waits
+errors, and cancels pending recovery on unplug, normal display sleep, or a change
+in display count or target display ID. Multiple external displays are supported;
+recovery briefly sleeps and wakes all connected screens. Between probes it waits
 one second normally and 150 ms during a detected power cycle. Polling pauses during its
 own six-second recovery sequence. Very fast power toggles may be too short to
 detect. A separate wake process survives the helper exiting mid-recovery.
@@ -62,12 +63,19 @@ that restriction was removed and a regression test added. The user then confirme
 two successive cycles recovered, but suspected mouse movement was needed. After
 extending the explicit display-awake assertion to ten seconds, the user confirmed
 a recovery returned the picture with no mouse or keyboard input.
-Eight regression tests pass. The user also confirmed that the faster polling and
+The original eight regression tests passed; additional tests now cover multiple
+displays, manual recovery, and cancellation during the final recheck. The user
+also confirmed that the faster polling and
 adaptive wake timing reduced the time for the picture to return without mouse input.
 Native Settings controls were visually inspected;
 pausing stopped the worker, resuming restarted it, and the login toggle removed
 and recreated its LaunchAgent file. Automatic recovery and login startup were left
 enabled. Physical results are separate from unit tests and driver command success.
+
+Version 1.4 passes all 15 regression tests. With two LG monitors connected, manual
+recovery completed, automatic monitoring resumed, and the user confirmed both
+screens showed a picture. Automatic recovery after a physical power cycle with
+both monitors connected still needs confirmation.
 
 ## Disable or remove
 

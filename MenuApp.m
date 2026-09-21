@@ -140,7 +140,7 @@ static NSString * const JobLabel = @"local.lg-monitor-recovery";
         self.lastLabel.textColor = NSColor.secondaryLabelColor;
         self.lastLabel.font = [NSFont systemFontOfSize:11];
         self.lastLabel.frame = NSMakeRect(24,188,340,18); [content addSubview:self.lastLabel];
-        NSTextField *detail = [NSTextField wrappingLabelWithString:@"Restores the video signal after the monitor is turned off and on. Your Mac and apps keep running."];
+        NSTextField *detail = [NSTextField wrappingLabelWithString:@"Restores the signal after monitor off/on. All screens briefly sleep and wake; apps keep running."];
         detail.frame = NSMakeRect(24,137,340,40); [content addSubview:detail];
         self.autoCheck = [NSButton checkboxWithTitle:@"Automatic recovery" target:self action:@selector(toggleRecovery:)];
         self.autoCheck.frame = NSMakeRect(22,103,344,24); [content addSubview:self.autoCheck];
@@ -218,7 +218,7 @@ static NSString * const JobLabel = @"local.lg-monitor-recovery";
     (void)sender;
     NSAlert *alert = [NSAlert new];
     alert.messageText = @"LG Monitor Recovery";
-    alert.informativeText = @"Restores the video signal after your LG 27UD58-B is turned off and on.\n\nWhen the monitor starts responding again, the app briefly sleeps and wakes only the display output. Your Mac and apps keep running.\n\nAutomatic recovery pauses during normal display sleep or when multiple external displays are connected.\n\nVersion 1.3 • Built for this Mac and monitor.\nUses m1ddc (MIT license).";
+    alert.informativeText = @"Restores the video signal after your LG 27UD58-B is turned off and on.\n\nWhen the monitor starts responding again, the app briefly sleeps and wakes only the display output. Your Mac and apps keep running.\n\nAutomatic recovery supports multiple external displays. All screens briefly sleep and wake during recovery. Normal display sleep cancels pending recovery.\n\nVersion 1.4 • Built for this Mac and monitor.\nUses m1ddc (MIT license).";
     [alert addButtonWithTitle:@"OK"];
     [alert runModal];
 }

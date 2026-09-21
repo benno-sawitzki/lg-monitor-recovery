@@ -32,7 +32,10 @@ been isolated to monitor firmware, cable, or macOS display handling.
   including Quit, Settings, automatic recovery, manual recovery, and logs.
 - Optional start at login.
 - Separate wake process that survives the recovery helper exiting.
-- Ignores isolated DDC errors and normal display sleep; pauses with multiple external displays.
+- Supports multiple external displays while watching the configured monitor by identity.
+- Ignores isolated DDC errors; cancels pending recovery on normal sleep, unplug,
+  or a change in display count or target display ID.
+- Recovery briefly sleeps and wakes all connected screens; applications keep running.
 - Local rotating logs; no network requests or telemetry.
 
 ## Scope and requirements
@@ -94,11 +97,16 @@ python3 "$HOME/Library/Application Support/LGDisplayRecovery/recovery.py" --prob
 
 ## Validation
 
-Eight regression tests cover detection, repeated power cycles, cancellation on
-normal sleep/disconnect, multiple displays, early wake, and timeout fallback.
+Fifteen regression tests cover detection, repeated power cycles with multiple displays,
+manual recovery, cancellation on normal sleep/disconnect or display changes,
+the final pre-recovery check, early wake, and timeout fallback.
 The owner physically confirmed repeated automatic recovery, recovery without
 mouse input, and faster picture return after the timing update. Actual picture
 recovery is distinct from a successful system command or unit test.
+
+With version 1.4, the owner confirmed both LG screens showed a picture after
+manual recovery with two external monitors connected. Automatic recovery after
+a physical monitor power cycle with both connected still needs confirmation.
 
 See [LOCAL-SETUP.md](LOCAL-SETUP.md) for implementation timing, installation paths,
 validation history, and disable/remove instructions.
@@ -114,7 +122,7 @@ display-output sleep/wake sequence that recovered that setup.
 
 ### Does this restart or put my Mac to sleep?
 
-It briefly sleeps and wakes the display output. Your Mac and applications keep
+It briefly sleeps and wakes all connected screens. Your Mac and applications keep
 running. Normal macOS display sleep cancels pending automatic recovery.
 
 ### Is this an LG driver or firmware update?
@@ -127,7 +135,11 @@ not affiliated with LG or Apple.
 
 Only the Apple Silicon and LG 27UD58-B setup described above has been physically
 validated. This build uses m1ddc and targets Apple Silicon; HDMI, Intel Macs,
-other models, and multiple external monitors are outside the validated scope.
+and other models are outside the validated scope. Multiple external monitors are
+supported by the recovery logic; the configured monitor alone triggers recovery,
+and the sleep/wake cycle affects all screens. Manual recovery has been physically
+confirmed with two LG monitors; automatic recovery in that setup still needs
+physical confirmation.
 
 ### Does it collect data?
 
